@@ -58,76 +58,78 @@ public class StudentManagementApp {
     }
     
     private static boolean login(Scanner scanner) throws SQLException {
-        System.out.println("=== User Login ==="); 
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        Console console = System.console();
-        String password;
+    System.out.println("=== User Login ==="); 
+    System.out.print("Username: ");
+    String username = scanner.nextLine();
+    Console console = System.console();
+    String password;
 
-        if (console != null) {
-            char[] passwordChars = console.readPassword("Password: ");
-            password = new String(passwordChars);
-        } else {
-            System.out.print("Password: ");
-            password = scanner.nextLine();
-        }
+    if (console != null) {
+        char[] passwordChars = console.readPassword("Password: ");
+        password = new String(passwordChars);
+    } else {
+        System.out.print("Password: ");
+        password = scanner.nextLine();
+    }
 
-        String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
+    String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, username);
+    stmt.setString(2, password);
 
-            ResultSet rs = stmt.executeQuery();
+    ResultSet rs = stmt.executeQuery();
 
-        if (rs.next()) {
-            String role = rs.getString("role");
-            System.out.println("Login successful! Role: " + role);
+    if (rs.next()) {
+        String role = rs.getString("role");
+        System.out.println("Login successful! Role: " + role);
         return true;
-        } else {
+    } else {
         System.out.println("Invalid username or password. Exiting.");
         return false;
-        }
+    }
 }
 
 
+
         private static void addStudent(Scanner scanner) throws SQLException {
-            System.out.print("Enter student name: ");
-            String name = scanner.nextLine();
+    System.out.print("Enter student name: ");
+    String name = scanner.nextLine();
 
-        String email;
-        while (true) {
-            System.out.print("Enter student email: ");
-            email = scanner.nextLine();
-            if (isValidEmail(email)) break;
-            System.out.println("Invalid email format. Please try again.");
-        }
+    String email;
+    while (true) {
+        System.out.print("Enter student email: ");
+        email = scanner.nextLine();
+        if (isValidEmail(email)) break;
+        System.out.println("Invalid email format. Please try again.");
+    }
 
-        int age;
-        while (true) {
-            System.out.print("Enter student age: ");
-            try {
-                age = Integer.parseInt(scanner.nextLine());
-                if (age >= 5 && age <= 120) break;
-                else System.out.println("Age must be between 5 and 120.");
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid integer for age.");
-            }
-        }
-
-        String sql = "INSERT INTO students (name, email, age) VALUES (?, ?, ?)";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, name);
-        stmt.setString(2, email);
-        stmt.setInt(3, age);
-
-        int rowsInserted = stmt.executeUpdate();
-
-        if (rowsInserted > 0) {
-            System.out.println("Student added successfully!");
-        } else {
-            System.out.println("Error adding student.");
+    int age;
+    while (true) {
+        System.out.print("Enter student age: ");
+        try {
+            age = Integer.parseInt(scanner.nextLine());
+            if (age >= 5 && age <= 120) break;
+            else System.out.println("Age must be between 5 and 120.");
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid integer for age.");
         }
     }
+
+    String sql = "INSERT INTO students (name, email, age) VALUES (?, ?, ?)";
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    stmt.setString(1, name);
+    stmt.setString(2, email);
+    stmt.setInt(3, age);
+
+    int rowsInserted = stmt.executeUpdate();
+
+    if (rowsInserted > 0) {
+        System.out.println("Student added successfully!");
+    } else {
+        System.out.println("Error adding student.");
+    }
+}
+
 
     private static void viewStudents(Scanner scanner) throws SQLException {
         System.out.println("Sort by:");
