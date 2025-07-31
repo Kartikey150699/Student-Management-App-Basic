@@ -258,6 +258,8 @@ public class MainMenuGUI extends JFrame {
                         return;
                 }
 
+                
+                
                 ResultSet rs = stmt.executeQuery();
 
                 StringBuilder sb = new StringBuilder();
