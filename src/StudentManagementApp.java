@@ -5,6 +5,7 @@ import java.io.Console;
 
 public class StudentManagementApp {
 
+    //JDBC connection establishment from the mysql database 
     private static final String URL = "jdbc:mysql://localhost:3306/my_app_db";
     private static final String USER = "root";
     private static final String PASSWORD = "kartikey@1506";
@@ -58,77 +59,89 @@ public class StudentManagementApp {
     }
     
     private static boolean login(Scanner scanner) throws SQLException {
-    System.out.println("=== User Login ==="); 
-    System.out.print("Username: ");
-    String username = scanner.nextLine();
-    Console console = System.console();
-    String password;
+        System.out.println("=== User Login ===");
+    
+        // Get username from user input
+        System.out.print("Username: ");
+        String username = scanner.nextLine();
 
-    if (console != null) {
-        char[] passwordChars = console.readPassword("Password: ");
-        password = new String(passwordChars);
-    } else {
-        System.out.print("Password: ");
-        password = scanner.nextLine();
-    }
+        // Use Console for secure password input if available
+        Console console = System.console();
+        String password;
 
-    String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
-    PreparedStatement stmt = conn.prepareStatement(sql);
-    stmt.setString(1, username);
-    stmt.setString(2, password);
+        if (console != null) {
+            char[] passwordChars = console.readPassword("Password: ");
+            password = new String(passwordChars);
+        } else {
+            // Fallback if console is not available (e.g., IDE)
+            System.out.print("Password: ");
+            password = scanner.nextLine();
+        }
 
-    ResultSet rs = stmt.executeQuery();
+        // Prepare SQL query to check credentials
+        String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, username);
+        stmt.setString(2, password);
 
-    if (rs.next()) {
-        String role = rs.getString("role");
-        System.out.println("Login successful! Role: " + role);
-        return true;
-    } else {
-        System.out.println("Invalid username or password. Exiting.");
-        return false;
-    }
-}
+        ResultSet rs = stmt.executeQuery();
 
-
-
-        private static void addStudent(Scanner scanner) throws SQLException {
-    System.out.print("Enter student name: ");
-    String name = scanner.nextLine();
-
-    String email;
-    while (true) {
-        System.out.print("Enter student email: ");
-        email = scanner.nextLine();
-        if (isValidEmail(email)) break;
-        System.out.println("Invalid email format. Please try again.");
-    }
-
-    int age;
-    while (true) {
-        System.out.print("Enter student age: ");
-        try {
-            age = Integer.parseInt(scanner.nextLine());
-            if (age >= 5 && age <= 120) break;
-            else System.out.println("Age must be between 5 and 120.");
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid integer for age.");
+        // Check if credentials are valid
+        if (rs.next()) {
+            String role = rs.getString("role");
+            System.out.println("Login successful! Role: " + role);
+            return true;
+        } else {
+            System.out.println("Invalid username or password. Exiting.");
+            return false;
         }
     }
 
-    String sql = "INSERT INTO students (name, email, age) VALUES (?, ?, ?)";
-    PreparedStatement stmt = conn.prepareStatement(sql);
-    stmt.setString(1, name);
-    stmt.setString(2, email);
-    stmt.setInt(3, age);
 
-    int rowsInserted = stmt.executeUpdate();
 
-    if (rowsInserted > 0) {
-        System.out.println("Student added successfully!");
-    } else {
-        System.out.println("Error adding student.");
+    private static void addStudent(Scanner scanner) throws SQLException {
+        // Prompt for student name
+        System.out.print("Enter student name: ");
+        String name = scanner.nextLine();
+
+        // Prompt for valid email until correct format is entered
+        String email;
+        while (true) {
+            System.out.print("Enter student email: ");
+            email = scanner.nextLine();
+            if (isValidEmail(email)) break;  // Check using helper method
+            System.out.println("Invalid email format. Please try again.");
+        }
+
+        // Prompt for valid age between 5 and 120
+        int age;
+        while (true) {
+            System.out.print("Enter student age: ");
+            try {
+                age = Integer.parseInt(scanner.nextLine());
+                if (age >= 5 && age <= 120) break;
+                else System.out.println("Age must be between 5 and 120.");
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid integer for age.");
+            }
+        }
+
+        // Prepare SQL INSERT query
+        String sql = "INSERT INTO students (name, email, age) VALUES (?, ?, ?)";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, name);
+        stmt.setString(2, email);
+        stmt.setInt(3, age);
+
+        // Execute the query and check if insert was successful
+        int rowsInserted = stmt.executeUpdate();
+
+        if (rowsInserted > 0) {
+            System.out.println("Student added successfully!");
+        } else {
+            System.out.println("Error adding student.");
+        }
     }
-}
 
 
     private static void viewStudents(Scanner scanner) throws SQLException {
@@ -169,12 +182,12 @@ public class StudentManagementApp {
         System.out.print("Enter student ID to update: ");
         int id = Integer.parseInt(scanner.nextLine());
 
+        // Prompt user to choose what to update
         System.out.println("What do you want to update?");
         System.out.println("1. Name");
         System.out.println("2. Email");
         System.out.println("3. Age");
         System.out.println("4. All");
-
         System.out.print("Enter choice: ");
         int choice = Integer.parseInt(scanner.nextLine());
 
@@ -188,6 +201,7 @@ public class StudentManagementApp {
                 newName = scanner.nextLine();
             }
             case 2 -> {
+                // Keep asking until a valid email is entered
                 while (true) {
                     System.out.print("Enter new email: ");
                     newEmail = scanner.nextLine();
@@ -196,6 +210,7 @@ public class StudentManagementApp {
                 }
             }
             case 3 -> {
+                // Keep asking until a valid age is entered
                 while (true) {
                     System.out.print("Enter new age: ");
                     try {
@@ -215,7 +230,7 @@ public class StudentManagementApp {
                     System.out.print("Enter new email: ");
                     newEmail = scanner.nextLine();
                     if (isValidEmail(newEmail)) break;
-                    System.out.println("Invalid email format. Please try again.");
+                        System.out.println("Invalid email format. Please try again.");
                 }
 
                 while (true) {
@@ -235,6 +250,7 @@ public class StudentManagementApp {
             }
         }
 
+        // Build SQL based on what the user chose to update
         String sql = null;
         if (choice == 1) {
             sql = "UPDATE students SET name = ? WHERE id = ?";
@@ -248,6 +264,7 @@ public class StudentManagementApp {
 
         PreparedStatement stmt = conn.prepareStatement(sql);
 
+        // Set parameters in PreparedStatement based on selected option
         if (choice == 1) {
             stmt.setString(1, newName);
             stmt.setInt(2, id);
@@ -264,6 +281,7 @@ public class StudentManagementApp {
             stmt.setInt(4, id);
         }
 
+        // Execute the update and print result
         int rowsUpdated = stmt.executeUpdate();
 
         if (rowsUpdated > 0) {
@@ -273,16 +291,22 @@ public class StudentManagementApp {
         }
     }
 
+    
+    
     private static void deleteStudent(Scanner scanner) throws SQLException {
+        // Ask for the student ID to delete
         System.out.print("Enter student ID to delete: ");
         int id = Integer.parseInt(scanner.nextLine());
 
+        // Prepare SQL DELETE statement
         String sql = "DELETE FROM students WHERE id = ?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setInt(1, id);
 
+        // Execute the deletion
         int rowsDeleted = stmt.executeUpdate();
 
+        // Show result
         if (rowsDeleted > 0) {
             System.out.println("Student deleted successfully!");
         } else {
@@ -290,6 +314,9 @@ public class StudentManagementApp {
         }
     }
 
+
+    
+    
     private static void searchStudents(Scanner scanner) throws SQLException {
         System.out.println("Search by:");
         System.out.println("1. Name");
@@ -303,6 +330,7 @@ public class StudentManagementApp {
         String sql = null;
         PreparedStatement stmt;
 
+        // Build SQL query based on search criteria
         switch (choice) {
             case 1:
                 System.out.print("Enter name to search (partial allowed): ");
@@ -311,6 +339,7 @@ public class StudentManagementApp {
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, "%" + searchTerm + "%");
                 break;
+
             case 2:
                 System.out.print("Enter email to search (partial allowed): ");
                 searchTerm = scanner.nextLine();
@@ -318,6 +347,7 @@ public class StudentManagementApp {
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, "%" + searchTerm + "%");
                 break;
+
             case 3:
                 while (true) {
                     System.out.print("Enter age to search: ");
@@ -333,28 +363,33 @@ public class StudentManagementApp {
                 stmt = conn.prepareStatement(sql);
                 stmt.setInt(1, ageTerm);
                 break;
+
             default:
                 System.out.println("Invalid choice. Returning to menu.");
                 return;
         }
 
+        // Execute the query and display results
         ResultSet rs = stmt.executeQuery();
-
         System.out.println("\nSearch results:");
         boolean found = false;
+
         while (rs.next()) {
             found = true;
             System.out.println("ID: " + rs.getInt("id")
-                    + ", Name: " + rs.getString("name")
-                    + ", Email: " + rs.getString("email")
-                    + ", Age: " + rs.getInt("age"));
+                            + ", Name: " + rs.getString("name")
+                            + ", Email: " + rs.getString("email")
+                            + ", Age: " + rs.getInt("age"));
         }
+
         if (!found) {
             System.out.println("No matching students found.");
         }
     }
 
+
     private static boolean isValidEmail(String email) {
+        // Simple regex check for basic email format
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         return Pattern.matches(emailRegex, email);
     }
